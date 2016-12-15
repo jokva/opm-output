@@ -29,13 +29,8 @@
 #include <opm/output/eclipse/EclipseWriter.hpp>
 #include <opm/output/data/Wells.hpp>
 
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
-#include <opm/parser/eclipse/Deck/Deck.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Schedule.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Well.hpp>
-#include <opm/parser/eclipse/EclipseState/Grid/EclipseGrid.hpp>
-#include <opm/parser/eclipse/EclipseState/IOConfig/IOConfig.hpp>
+#include <opm/parser/eclipse/Parser.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
 
 #include <ert/ecl/ecl_rft_file.h>
 #include <ert/ecl/ecl_util.h>
@@ -109,7 +104,7 @@ BOOST_AUTO_TEST_CASE(test_RFT) {
     ERT::TestArea test_area("test_RFT");
     test_area.copyFile( eclipse_data_filename );
 
-    auto eclipseState = Parser::parse( eclipse_data_filename );
+    auto eclipseState = ecl::parse( eclipse_data_filename );
     {
         /* eclipseWriter is scoped here to ensure it is destroyed after the
          * file itself has been written, because we're going to reload it

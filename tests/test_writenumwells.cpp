@@ -28,13 +28,8 @@
 #include <opm/common/utility/platform_dependent/reenable_warnings.h>
 
 #include <opm/output/eclipse/EclipseWriter.hpp>
-#include <opm/parser/eclipse/EclipseState/Grid/EclipseGrid.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/CompletionSet.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Schedule.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/TimeMap.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Well.hpp>
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
+#include <opm/parser/eclipse/Parser.hpp>
 
 // ERT stuff
 #include <ert/ecl/ecl_kw.h>
@@ -138,7 +133,7 @@ BOOST_AUTO_TEST_CASE(EclipseWriteRestartWellInfo) {
     test_work_area_type * test_area = test_work_area_alloc("TEST_EclipseWriteNumWells");
     test_work_area_copy_file(test_area, eclipse_data_filename.c_str());
 
-    auto es = Parser::parse( eclipse_data_filename, ParseContext() );
+    auto es = ecl::parse( eclipse_data_filename );
     const auto num_cells = es.getInputGrid().getCartesianSize();
     EclipseWriter eclipseWriter( es,  es.getInputGrid() );
 

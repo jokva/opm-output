@@ -37,13 +37,8 @@
 #include <opm/output/data/Cells.hpp>
 #include <opm/output/eclipse/Summary.hpp>
 
-#include <opm/parser/eclipse/Deck/Deck.hpp>
-#include <opm/parser/eclipse/Units/UnitSystem.hpp>
-#include <opm/parser/eclipse/EclipseState/Grid/EclipseGrid.hpp>
-#include <opm/parser/eclipse/EclipseState/EclipseState.hpp>
-#include <opm/parser/eclipse/EclipseState/SummaryConfig/SummaryConfig.hpp>
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
+#include <opm/parser/eclipse/Parser.hpp>
 
 using namespace Opm;
 using rt = data::Rates::opt;
@@ -195,9 +190,8 @@ ERT::ert_unique_ptr< ecl_sum_type, ecl_sum_free > readsum( const std::string& ba
 }
 
 struct setup {
-    Deck deck;
     EclipseState es;
-    SummaryConfig config;
+    const SummaryConfig& config;
     const EclipseGrid& grid;
     const out::RegionCache regionCache;
     data::Wells wells;
@@ -210,18 +204,15 @@ struct setup {
     std::unordered_map<int , std::vector<size_t>> cells;
 
     setup( const std::string& fname , const ParseContext& parseContext = ParseContext( )) :
-        deck( Parser().parseFile( path, parseContext ) ),
-        es( deck, ParseContext() ),
-        config( deck, es, parseContext ),
+        es( ecl::parse( path, parseContext ) ),
+        config( es.getSummaryConfig() ),
         grid( es.getInputGrid() ),
         regionCache( es , grid ),
         wells( result_wells() ),
         name( fname ),
-        ta( ERT::TestArea("test_summary") ),
+        ta( ERT::TestArea( fname ) ),
         solution( make_solution( es.getInputGrid() ) )
-    {
-        solution = make_solution( es.getInputGrid());
-    }
+    {}
 
 };
 

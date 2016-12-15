@@ -40,26 +40,18 @@
 #include <opm/output/data/Cells.hpp>
 #include <opm/output/eclipse/Tables.hpp>
 
-#include <opm/parser/eclipse/Deck/Deck.hpp>
-#include <opm/parser/eclipse/Units/UnitSystem.hpp>
-#include <opm/parser/eclipse/EclipseState/Grid/EclipseGrid.hpp>
-#include <opm/parser/eclipse/EclipseState/EclipseState.hpp>
-#include <opm/parser/eclipse/EclipseState/SummaryConfig/SummaryConfig.hpp>
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
+#include <opm/parser/eclipse/Parser.hpp>
 
 using namespace Opm;
 
-
 struct setup {
-    Deck deck;
     EclipseState es;
     ERT::TestArea ta;
 
     setup( const std::string& name, const std::string& path , const ParseContext& parseContext = ParseContext( )) :
-        deck( Parser().parseFile( path, parseContext ) ),
-        es( deck, ParseContext() ),
-        ta( ERT::TestArea("test_tables") )
+        es( ecl::parse( path, parseContext ) ),
+        ta( ERT::TestArea("test_tables" + name ) )
     {
     }
 

@@ -28,16 +28,9 @@
 #include <opm/output/eclipse/EclipseWriter.hpp>
 #include <opm/output/data/Cells.hpp>
 
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
-#include <opm/parser/eclipse/Deck/Deck.hpp>
-#include <opm/parser/eclipse/Deck/DeckKeyword.hpp>
-#include <opm/parser/eclipse/EclipseState/Grid/EclipseGrid.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Schedule.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/TimeMap.hpp>
-#include <opm/parser/eclipse/EclipseState/IOConfig/IOConfig.hpp>
-#include <opm/parser/eclipse/Units/Units.hpp>
-#include <opm/parser/eclipse/Units/UnitSystem.hpp>
+#include <opm/parser/eclipse/Parser.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
+#include <opm/parser/eclipse/Units.hpp>
 
 // ERT stuff
 #include <ert/ecl/ecl_kw.h>
@@ -145,7 +138,7 @@ void checkEgridFile( const EclipseGrid& eclGrid ) {
     fortio_fclose(egridFile);
 }
 
-void checkInitFile( const Deck& deck, const data::Solution& simProps) {
+void checkInitFile( const EclipseState& es, const data::Solution& simProps) {
     // use ERT directly to inspect the INIT file produced by EclipseWriter
     ERT::ert_unique_ptr<ecl_file_type , ecl_file_close> initFile(ecl_file_open( "FOO.INIT" , 0 ));
 
@@ -154,13 +147,17 @@ void checkInitFile( const Deck& deck, const data::Solution& simProps) {
         std::string keywordName(ecl_kw_get_header(eclKeyword));
 
         if (keywordName == "PORO") {
-            const auto &sourceData = deck.getKeyword("PORO").getSIDoubleData();
+            const auto& sourceData = es.get3DProperties()
+                                       .getDoubleGridProperty( "PORO" )
+                                       .getData();
             auto resultData = getErtData< float >( eclKeyword );
             compareErtData(sourceData, resultData, 1e-4);
         }
 
         if (keywordName == "PERMX") {
-            const auto& sourceData = deck.getKeyword("PERMX").getSIDoubleData();
+            const auto& sourceData = es.get3DProperties()
+                                       .getDoubleGridProperty( "PERMX" )
+                                       .getData();
             auto resultData = getErtData< float >( eclKeyword );
 
             // convert the data from ERT from Field to SI units (mD to m^2)
@@ -271,8 +268,7 @@ BOOST_AUTO_TEST_CASE(EclipseWriterIntegration) {
     ERT::TestArea ta("test_ecl_writer");
 
     auto write_and_check = [&]( int first = 1, int last = 5 ) {
-        auto deck = Parser().parseString( deckString, ParseContext() );
-        auto es = Parser::parse( deck );
+        auto es = ecl::parseString( deckString );
         auto& eclGrid = es.getInputGrid();
         es.getIOConfig().setBaseName( "FOO" );
 
@@ -313,7 +309,7 @@ BOOST_AUTO_TEST_CASE(EclipseWriterIntegration) {
             checkRestartFile( i );
         }
 
-        checkInitFile( deck , eGridProps);
+        checkInitFile( es, eGridProps);
         checkEgridFile( eclGrid );
 
         std::ifstream file( "FOO.UNRST", std::ios::binary );

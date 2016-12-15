@@ -29,14 +29,9 @@
 #include <opm/output/eclipse/EclipseReader.hpp>
 #include <opm/output/data/Cells.hpp>
 #include <opm/output/data/Wells.hpp>
-#include <opm/parser/eclipse/Deck/Deck.hpp>
-#include <opm/parser/eclipse/EclipseState/Grid/EclipseGrid.hpp>
-#include <opm/parser/eclipse/EclipseState/IOConfig/IOConfig.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Schedule.hpp>
-#include <opm/parser/eclipse/EclipseState/Schedule/Well.hpp>
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
-#include <opm/parser/eclipse/Utility/Functional.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
+#include <opm/parser/eclipse/Parser.hpp>
+#include <opm/parser/eclipse/bits/Utility/Functional.hpp>
 
 // ERT stuff
 #include <ert/ecl/ecl_kw.h>
@@ -373,7 +368,7 @@ first_sim(test_work_area_type * test_area) {
     std::string eclipse_data_filename    = "FIRST_SIM.DATA";
     test_work_area_copy_file(test_area, eclipse_data_filename.c_str());
 
-    auto eclipseState = Parser::parse( eclipse_data_filename );
+    auto eclipseState = ecl::parse( eclipse_data_filename );
 
     const auto& grid = eclipseState.getInputGrid();
     auto num_cells = grid.getNX() * grid.getNY() * grid.getNZ();
@@ -394,7 +389,7 @@ first_sim(test_work_area_type * test_area) {
 }
 
 std::pair< data::Solution, data::Wells > second_sim() {
-    auto eclipseState = Parser::parseData( input() );
+    auto eclipseState = ecl::parseString( input() );
 
     const auto& grid = eclipseState.getInputGrid();
     auto num_cells = grid.getNX() * grid.getNY() * grid.getNZ();
@@ -429,7 +424,7 @@ BOOST_AUTO_TEST_CASE(EclipseReadWriteWellStateData) {
 }
 
 BOOST_AUTO_TEST_CASE(OPM_XWEL) {
-    auto es = Parser::parseData( input( "XWEL" ) );
+    auto es = ecl::parseString( input( "XWEL" ) );
     const auto& sched = es.getSchedule();
     const auto& grid = es.getInputGrid();
     const auto& ph = es.runspec().phases();

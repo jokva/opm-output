@@ -20,6 +20,7 @@
 #ifndef OPM_REGION_CACHE_HPP
 #define OPM_REGION_CACHE_HPP
 
+#include <map>
 #include <vector>
 
 namespace Opm {

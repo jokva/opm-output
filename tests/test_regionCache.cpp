@@ -28,11 +28,8 @@
 
 #include <stdexcept>
 
-#include <opm/parser/eclipse/Deck/Deck.hpp>
-#include <opm/parser/eclipse/EclipseState/EclipseState.hpp>
 #include <opm/output/eclipse/RegionCache.hpp>
-#include <opm/parser/eclipse/Parser/ParseContext.hpp>
-#include <opm/parser/eclipse/Parser/Parser.hpp>
+#include <opm/parser/eclipse/EclipseState.hpp>
 
 #include <opm/output/eclipse/RegionCache.hpp>
 
@@ -42,10 +39,7 @@ const char* path = "summary_deck.DATA";
 
 
 BOOST_AUTO_TEST_CASE(create) {
-    ParseContext parseContext;
-    Parser parser;
-    Deck deck( parser.parseFile( path, parseContext ));
-    EclipseState es(deck , parseContext );
+    const auto es = ecl::parse( path );
     const EclipseGrid& grid = es.getInputGrid();
     out::RegionCache rc(es , grid);
 
