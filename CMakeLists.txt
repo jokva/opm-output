@@ -99,3 +99,9 @@ macro (install_hook)
 endmacro (install_hook)
 
 include (OpmLibMain)
+
+target_link_libraries(opmoutput ecl ecl_well)
+foreach (test ${TEST_SOURCE_FILES})
+    get_filename_component(target ${test} NAME_WE)
+    target_link_libraries(${target} ert_utilxx)
+endforeach ()
